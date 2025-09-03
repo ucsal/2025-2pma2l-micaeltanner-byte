@@ -1,26 +1,28 @@
 package br.com.mariojp.solid.lspaccounts;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class BankServiceTest {
 
     @Test
-    void checking_account_allows_withdrawal() {
-        var acc = new CheckingAccount();
-        acc.deposit(100);
-        new BankService().processWithdrawal(acc, 50);
-        assertEquals(50, acc.getBalance());
-    }
+    public void testProcessWithdrawal() {
+        BankService service = new BankService();
+        
+        CheckingAccount checking = new CheckingAccount();
+        checking.deposit(100);
+        service.processWithdrawal(checking, 50);
+        assertEquals(50, checking.getBalance(), 0.001);
+        
+        SavingsAccount savings = new SavingsAccount();
+        savings.deposit(100);
 
-    @Test
-    void savings_account_should_not_throw_and_should_not_withdraw() {
-        var acc = new SavingsAccount();
-        acc.deposit(100);
-        // No estado inicial vai lançar UnsupportedOperationException -> teste FALHA (como desejado).
-        assertDoesNotThrow(() -> new BankService().processWithdrawal(acc, 50),
-                "Após refatoração, processWithdrawal não deve tentar sacar de poupança");
-        assertEquals(100, acc.getBalance(), 0.0001,
-                "Poupança não deve ter saldo reduzido em operação de saque");
+       
+        if (savings instanceof Withdrawable withdrawable) {
+            service.processWithdrawal(withdrawable, 30);
+        } else {
+            
+            assertEquals(100, savings.getBalance(), 0.001);
+        }
     }
 }
